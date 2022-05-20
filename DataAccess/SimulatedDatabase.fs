@@ -50,6 +50,7 @@ let mutable private stockData : StockData =
                 bins.[1], products.[0]
                 bins.[3], products.[1]
                 bins.[4], products.[2]
+                bins.[5], products.[0]
             ]
         BinStructure =
             Map.ofList [

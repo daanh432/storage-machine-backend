@@ -27,7 +27,9 @@ let stockOverview (next: HttpFunc) (ctx: HttpContext) =
 /// An overview of all products stored in the Storage Machine, regardless what bins contain them.
 let productsInStock (next: HttpFunc) (ctx: HttpContext) =
     task {
-        let productsOverview = Stock.productsInStock (failwith "Exercise 0: fill this in to complete this HTTP handler.")
+        let dataAccess = ctx.GetService<IStockDataAccess> ()
+        let bins = Stock.binOverview dataAccess
+        let productsOverview = Stock.productsInStock bins
         return! ThothSerializer.RespondJson productsOverview Serialization.encoderProductsOverview next ctx 
     }
 
