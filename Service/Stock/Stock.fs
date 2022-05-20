@@ -16,6 +16,19 @@ let binOverview (next: HttpFunc) (ctx: HttpContext) =
         return! ThothSerializer.RespondJsonSeq bins Serialization.encoderBin next ctx 
     }
 
+let binAdd (next: HttpFunc) (ctx: HttpContext) =
+    task {
+        // Decode an integer number from JSON
+        let! inputNumber = ThothSerializer.ReadBody ctx Decode.int
+        match inputNumber with
+        | Error _ ->
+            return! RequestErrors.badRequest (text "POST body expected to consist of a single number") earlyReturn ctx
+        | Ok number when number % 2 = 0 ->
+            return! RequestErrors.notAcceptable (text "I don't want an even number") earlyReturn ctx
+        | Ok number ->
+            return! Successful.ok (text (sprintf "That's a nice odd number %d" number)) next ctx
+    }
+
 /// An overview of actual stock currently stored in the Storage Machine. Actual stock is defined as all non-empty bins.
 let stockOverview (next: HttpFunc) (ctx: HttpContext) =
     task {
@@ -37,6 +50,7 @@ let productsInStock (next: HttpFunc) (ctx: HttpContext) =
 let handlers : HttpHandler =
     choose [
         GET >=> route "/bins" >=> binOverview
+        POST >=> route "/bins" >=> binAdd
         GET >=> route "/stock" >=> stockOverview
         GET >=> route "/stock/products" >=> productsInStock
     ]
