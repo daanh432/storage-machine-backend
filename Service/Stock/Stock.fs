@@ -7,6 +7,7 @@ open Microsoft.AspNetCore.Http
 open Thoth.Json.Net
 open Thoth.Json.Giraffe
 open Stock
+open StorageMachine.Stock.Serialization
 
 /// An overview of all bins currently stored in the Storage Machine.
 let binOverview (next: HttpFunc) (ctx: HttpContext) =
@@ -18,15 +19,15 @@ let binOverview (next: HttpFunc) (ctx: HttpContext) =
 
 let binAdd (next: HttpFunc) (ctx: HttpContext) =
     task {
-        // Decode an integer number from JSON
-        let! inputNumber = ThothSerializer.ReadBody ctx Decode.int
-        match inputNumber with
-        | Error _ ->
-            return! RequestErrors.badRequest (text "POST body expected to consist of a single number") earlyReturn ctx
-        | Ok number when number % 2 = 0 ->
-            return! RequestErrors.notAcceptable (text "I don't want an even number") earlyReturn ctx
-        | Ok number ->
-            return! Successful.ok (text (sprintf "That's a nice odd number %d" number)) next ctx
+        let dataAccess = ctx.GetService<IStockDataAccess> ()
+        let! bin = ThothSerializer.ReadBody ctx decoderBin
+        match bin with
+        | Error error ->
+            return! RequestErrors.badRequest (text error) earlyReturn ctx
+        | Ok bin ->
+            match Stock.storeBin dataAccess bin with
+            | Ok(_) -> return! ThothSerializer.RespondJson bin encoderBin next ctx
+            | Error(error) -> return! RequestErrors.badRequest (text error) earlyReturn ctx
     }
 
 /// An overview of actual stock currently stored in the Storage Machine. Actual stock is defined as all non-empty bins.

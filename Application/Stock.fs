@@ -10,7 +10,10 @@ type IStockDataAccess =
 
     /// Retrieve all bins currently stored in the Storage Machine.
     abstract RetrieveAllBins : unit -> List<Bin>
-
+    
+    /// Store a bin to the database
+    abstract StoreBin : Bin -> Result<unit, string>
+    
 /// An overview of all bins currently stored in the Storage Machine.
 let binOverview (dataAccess : IStockDataAccess) : List<Bin> =
     // Trivially
@@ -35,3 +38,6 @@ let productsInStock bins : ProductsOverview =
     |> totalQuantity
     |> Map.toList
     |> Set.ofList
+    
+let storeBin (dataAccess : IStockDataAccess) (bin: Bin) =
+    dataAccess.StoreBin bin
