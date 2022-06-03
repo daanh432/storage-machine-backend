@@ -24,4 +24,4 @@ let rec packageProducts (binTree: BinTree) : BinTree =
     match binTree with
     | Bin (id, productsOrBins) -> Bin(id, List.map packageProducts productsOrBins)
     | Product partNumber -> PackagedProduct(partNumber)
-    | PackagedProduct partNumber -> PackagedProduct(partNumber)
+    | PackagedProduct _ as alreadyPackaged -> alreadyPackaged
