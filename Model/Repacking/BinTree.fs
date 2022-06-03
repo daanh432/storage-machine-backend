@@ -20,11 +20,8 @@ let rec productCount binTree =
     | Product _ -> 1
     | PackagedProduct _ -> 1
 
-let rec packageProducts binTree =
+let rec packageProducts (binTree: BinTree) : BinTree =
     match binTree with
-    | Bin(_, productsOrBins) ->
-        match productsOrBins with
-        | head :: tail -> packageProducts head @ tail
-        | [] -> []
-    | Product partNumber -> PackagedProduct(partNumber) :: []
-    | PackagedProduct partNumber -> PackagedProduct(partNumber) :: []
+    | Bin (id, productsOrBins) -> Bin(id, List.map packageProducts productsOrBins)
+    | Product partNumber -> PackagedProduct(partNumber)
+    | PackagedProduct partNumber -> PackagedProduct(partNumber)
