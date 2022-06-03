@@ -19,3 +19,12 @@ let rec productCount binTree =
     | Bin (_, productsOrBins) -> List.sumBy productCount productsOrBins
     | Product _ -> 1
     | PackagedProduct _ -> 1
+
+let rec packageProducts binTree =
+    match binTree with
+    | Bin(_, productsOrBins) ->
+        match productsOrBins with
+        | head :: tail -> packageProducts head @ tail
+        | [] -> []
+    | Product partNumber -> PackagedProduct(partNumber) :: []
+    | PackagedProduct partNumber -> PackagedProduct(partNumber) :: []
